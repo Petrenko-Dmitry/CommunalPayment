@@ -11,7 +11,7 @@ public class PaymentDAO {
 
     public void savePayment(Payment payment) {
         List<Long> longStream = new ArrayList<>(this.findAllPaymentIds());
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
             String sql;
             if (longStream.stream().anyMatch(id -> id.equals(payment.getId()))) {
                 sql = "update user_payment " +
@@ -20,6 +20,7 @@ public class PaymentDAO {
                         "change_date = ? " +
                         "where " +
                         "user_payment_id = ?;";
+                assert connection != null;
                 PreparedStatement statement = connection.prepareStatement(sql);
                 statement.setString(1, payment.getPaymentStatus().toString());
                 statement.setLong(2, payment.getDateChange());
@@ -30,6 +31,7 @@ public class PaymentDAO {
                 sql = "insert into user_payment" +
                         "(template_name, card_number, payment_sum, payment_status, creation_date, change_date) " +
                         "values (?,?,?,?,?,?);";
+                assert connection != null;
                 PreparedStatement statement = connection.prepareStatement(sql);
                 statement.setString(1, payment.getTemplateName());
                 statement.setLong(2, payment.getCardNumber());
@@ -48,7 +50,7 @@ public class PaymentDAO {
     public List<Payment> findPaymentWithNewStatus() {
         List<Payment> paymentList = new ArrayList<>();
 
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
             String sql = "SELECT * from user_payment " +
                     "where " +
                     "payment_status = ?;";
@@ -78,9 +80,10 @@ public class PaymentDAO {
 
     public List<Long> findAllPaymentIds() {
         List<Long> paymentList = new ArrayList<>();
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
 
             String sql = "SELECT user_payment_id from user_payment;";
+            assert connection != null;
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -93,13 +96,14 @@ public class PaymentDAO {
     }
 
     public void saveListToDB(List<Payment> paymentList) {
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
             String sql = "update user_payment " +
                     "set " +
                     "payment_status = ?," +
                     "change_date = ? " +
                     "where " +
                     "user_payment_id = ?;";
+            assert connection != null;
             PreparedStatement statement = connection.prepareStatement(sql);
             for (Payment payment : paymentList) {
                 statement.setString(1, payment.getPaymentStatus().toString());

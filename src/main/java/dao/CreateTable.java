@@ -15,8 +15,7 @@ public class CreateTable {
 
     private void createTableCommunalUserIfNotExist() {
         if (!Objects.requireNonNull(this.checkForTables()).contains("communal_user")) {
-            try (Connection connection = Connector.getConnection();
-                 Statement statement = connection.createStatement()) {
+            try (Statement statement = Objects.requireNonNull(ConnectionPool.createConnection()).createStatement()) {
                 String sql = "create table communal_user" +
                         "(" +
                         "fio varchar," +
@@ -33,8 +32,7 @@ public class CreateTable {
 
     private void createTableUserAddressIfNotExist() {
         if (!Objects.requireNonNull(this.checkForTables()).contains("user_address")) {
-            try (Connection connection = Connector.getConnection();
-                 Statement statement = connection.createStatement()) {
+            try (Statement statement = Objects.requireNonNull(ConnectionPool.createConnection()).createStatement()) {
                 String sql = "create sequence user_address_serial;" +
                         "alter sequence user_address_serial start 1000001;" +
                         "alter sequence user_address_serial restart 1000001;" +
@@ -57,8 +55,7 @@ public class CreateTable {
 
     private void createTableUserTemplateIfNotExist() {
         if (!Objects.requireNonNull(this.checkForTables()).contains("user_template")) {
-            try (Connection connection = Connector.getConnection();
-                 Statement statement = connection.createStatement()) {
+            try (Statement statement = Objects.requireNonNull(ConnectionPool.createConnection()).createStatement()) {
                 String sql = "create sequence user_template_serial;" +
                         "alter sequence user_template_serial start 1000001;" +
                         "alter sequence user_template_serial restart 1000001;" +
@@ -83,8 +80,7 @@ public class CreateTable {
 
     private void createTableUserPaymentIfNotExist() {
         if (!Objects.requireNonNull(this.checkForTables()).contains("user_payment")) {
-            try (Connection connection = Connector.getConnection();
-                 Statement statement = connection.createStatement()) {
+            try (Statement statement = Objects.requireNonNull(ConnectionPool.createConnection()).createStatement()) {
                 String sql = "create sequence user_payment_serial;" +
                         "alter sequence user_payment_serial start 1000001;" +
                         "alter sequence user_payment_serial restart 1000001;" +
@@ -110,8 +106,9 @@ public class CreateTable {
 
     private List<String> checkForTables() {
         List<String> tableNames = new ArrayList<>();
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
             String sql = "SELECT * FROM pg_catalog.pg_tables;";
+            assert connection != null;
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {

@@ -9,12 +9,13 @@ import java.sql.SQLException;
 public class CommunalUserDAO {
 
     public void saveUser(CommunalUser user) {
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
             String sql = "insert into communal_user" +
                     "(fio, email, phone_number) " +
                     "values " +
                     "(?,?,?); ";
 
+            assert connection != null;
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, user.getFio());
             statement.setString(2, user.getEmail());

@@ -9,12 +9,13 @@ import java.sql.SQLException;
 public class TemplateDAO {
 
     public void saveTemplate(Template template) {
-        try (Connection connection = Connector.getConnection()) {
+        try (Connection connection = ConnectionPool.createConnection()) {
 
             String sql = "insert into user_template" +
                     "(template_name, iban, payment_purpose, user_address_id) " +
                     "values " +
                     "(?,?,?,?);";
+            assert connection != null;
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, template.getTemplateName());
             statement.setString(2, template.getIban());
